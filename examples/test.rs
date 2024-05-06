@@ -1,4 +1,4 @@
-use derive_attr::{
+use attr_parser_fn::{
     meta::{conflicts, key_value, meta_list, optional, path_only, value},
     ParseArgs, ParseAttrTrait,
 };
