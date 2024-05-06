@@ -6,12 +6,24 @@ use crate::{Marker, ParseArgs};
 
 use super::{list, List, ParseMeta, ParseMetaUnnamed};
 
-pub fn optional<T>(p: T) -> Optional<T>
-where
-    T: ParseMeta,
-{
-    Optional(p)
+pub trait ParseMetaExt: ParseMeta + Sized {
+    fn optional(self) -> Optional<Self> {
+        Optional(self)
+    }
+
+    fn map<F, R>(self, map: F) -> Map<Self, F>
+    where
+        F: FnOnce(Self::Output) -> R,
+    {
+        Map { parser: self, map }
+    }
+
+    fn value<U>(self, value: U) -> impl ParseMeta<Output = U> {
+        self.map(move |_| value)
+    }
 }
+
+impl<T> ParseMetaExt for T where T: ParseMeta + Sized {}
 
 pub struct Optional<T>(T);
 
@@ -42,21 +54,6 @@ where
     fn ok_to_finish(&self) -> bool {
         true
     }
-}
-
-pub fn map<T, F, R>(parser: T, map: F) -> Map<T, F>
-where
-    T: ParseMeta,
-    F: FnOnce(T::Output) -> R,
-{
-    Map { parser, map }
-}
-
-pub fn value<T, U>(parser: T, value: U) -> impl ParseMeta<Output = U>
-where
-    T: ParseMeta,
-{
-    map(parser, move |_| value)
 }
 
 pub struct Map<T, F> {

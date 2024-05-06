@@ -6,14 +6,15 @@ use syn::{
     meta::ParseNestedMeta,
     parenthesized,
     parse::{Parse, ParseStream, Parser},
-    Error, Result,
+    token::Paren,
+    Error, Result, Token,
 };
 
 use crate::ParseAttrTrait;
 
 pub use self::{
     conflicts::{conflicts, ConflictGroup},
-    utils::{map, meta_list, optional, value, Map, MetaList, Optional},
+    utils::{meta_list, Map, MetaList, Optional, ParseMetaExt},
 };
 
 mod conflicts;
@@ -79,9 +80,13 @@ pub struct PathOnly {
 impl ParseMetaUnnamed for PathOnly {
     type Output = bool;
 
-    fn parse(&mut self, _: &ParseNestedMeta) -> Result<bool> {
-        self.assigned = true;
-        Ok(true)
+    fn parse(&mut self, nested: &ParseNestedMeta) -> Result<bool> {
+        if nested.input.peek(Token![,]) || nested.input.is_empty() {
+            self.assigned = true;
+            Ok(true)
+        } else {
+            Ok(false)
+        }
     }
 
     fn finish(self) -> Option<Self::Output> {
@@ -111,8 +116,12 @@ where
     type Output = T;
 
     fn parse(&mut self, nested: &ParseNestedMeta) -> Result<bool> {
-        self.value = Some(nested.value()?.parse::<T>()?);
-        Ok(true)
+        if nested.input.peek(Token![=]) {
+            self.value = Some(nested.value()?.parse::<T>()?);
+            Ok(true)
+        } else {
+            Ok(false)
+        }
     }
 
     fn finish(self) -> Option<Self::Output> {
@@ -151,6 +160,10 @@ where
     type Output = P::Output;
 
     fn parse(&mut self, nested: &ParseNestedMeta) -> Result<bool> {
+        if !nested.input.peek(Paren) {
+            return Ok(false);
+        }
+
         let inner = &mut self.0;
 
         let content;

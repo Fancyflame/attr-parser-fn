@@ -58,7 +58,7 @@ where
                     if !self.meta.parse(&nested)? {
                         return Err(Error::new_spanned(
                             nested.path,
-                            format!("unrecognized path `{id}`"),
+                            format!("attribute `{id}` is not expected, or the calling form is not compliant"),
                         ));
                     }
 

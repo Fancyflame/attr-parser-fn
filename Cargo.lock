@@ -4,7 +4,7 @@ version = 3
 
 [[package]]
 name = "attr-parser-fn"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "impl_variadics",
  "proc-macro2",
@@ -14,9 +14,9 @@ dependencies = [
 
 [[package]]
 name = "impl_variadics"
-version = "0.1.2"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1051e1ca1689bb8e4566365380566bb81057ca7cd3bec48529c840917ed3a407"
+checksum = "50b0f50ee54d6d50267e1ac9989e7042da411db999591afc049b4a7fc294a84c"
 dependencies = [
  "proc-macro2",
  "quote",

@@ -1,6 +1,6 @@
 [package]
 name = "attr-parser-fn"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 description = "parse attribute procedual macros in functional way"
 license = "MIT"
@@ -15,4 +15,4 @@ keywords = ["attribute", "macro", "nom", "functional"]
 syn = { version = "2.0", features = ["extra-traits"] }
 quote = "1.0"
 proc-macro2 = "1.0"
-impl_variadics = "0.1"
+impl_variadics = "0.3"

@@ -1,5 +1,5 @@
 use attr_parser_fn::{
-    meta::{conflicts, key_value, meta_list, optional, path_only, value},
+    meta::{conflicts, key_value, meta_list, path_only, ParseMetaExt},
     ParseArgs, ParseAttrTrait,
 };
 
@@ -11,7 +11,7 @@ fn main() {
             "hello",
             "world",
             122,
-            conf2 = 114 + 514,
+            conf1 = 114 + 514,
             key_value = SomeType<A, B>,
             path_only,
             nested(tea(green_tea)))
@@ -25,10 +25,11 @@ fn main() {
         .meta((
             ("path_only", path_only()),
             ("key_value", key_value::<Type>()),
-            optional(("kv_optional", key_value::<Expr>())),
+            ("kv_optional", key_value::<Expr>()).optional(),
             conflicts((
-                value(("conf1", path_only()), "conf1"),
-                value(("conf2", key_value::<Expr>()), "conf2"),
+                ("conf1", path_only()).value("conf1"),
+                ("conf1", key_value::<Expr>()).value("conf1_expr"),
+                ("conf2", key_value::<Expr>()).value("conf2"),
             )),
             (
                 "nested",
@@ -37,8 +38,8 @@ fn main() {
                     (
                         "tea",
                         meta_list(conflicts((
-                            value(("red_tea", path_only()), "red_tea"),
-                            value(("green_tea", path_only()), "green_tea"),
+                            ("red_tea", path_only()).value("red_tea"),
+                            ("green_tea", path_only()).value("green_tea"),
                         ))),
                     ),
                 )),
@@ -54,7 +55,7 @@ fn main() {
                 true,
                 _, // SomeType<A, B>
                 None,
-                "conf2",
+                "conf1_expr",
                 (false, "green_tea"),
             ),
     } = parser.parse_attrs(&attr).unwrap()
