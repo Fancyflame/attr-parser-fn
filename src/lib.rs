@@ -11,6 +11,7 @@ use syn::{
 };
 
 pub mod args;
+pub mod find_attr;
 pub mod meta;
 pub mod opt_args;
 pub mod rest_args;
