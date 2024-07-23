@@ -7,7 +7,7 @@ use syn::{
     parenthesized,
     parse::{Parse, ParseStream, Parser},
     token::Paren,
-    Error, Result, Token,
+    Error, LitStr, Result, Token,
 };
 
 use crate::ParseAttrTrait;
@@ -118,6 +118,42 @@ where
     fn parse(&mut self, nested: &ParseNestedMeta) -> Result<bool> {
         if nested.input.peek(Token![=]) {
             self.value = Some(nested.value()?.parse::<T>()?);
+            Ok(true)
+        } else {
+            Ok(false)
+        }
+    }
+
+    fn finish(self) -> Option<Self::Output> {
+        self.value
+    }
+
+    fn ok_to_finish(&self) -> bool {
+        self.value.is_some()
+    }
+}
+
+pub fn key_str<T>() -> KeyStr<T>
+where
+    T: Parse,
+{
+    KeyStr { value: None }
+}
+
+pub struct KeyStr<T> {
+    value: Option<T>,
+}
+
+impl<T> ParseMetaUnnamed for KeyStr<T>
+where
+    T: Parse,
+{
+    type Output = T;
+
+    fn parse(&mut self, nested: &ParseNestedMeta) -> Result<bool> {
+        if nested.input.peek(Token![=]) {
+            let litstr: LitStr = nested.value()?.parse()?;
+            self.value = Some(litstr.parse()?);
             Ok(true)
         } else {
             Ok(false)

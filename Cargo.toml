@@ -1,6 +1,6 @@
 [package]
 name = "attr-parser-fn"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 description = "parse attribute procedual macros in functional way"
 license = "MIT"
