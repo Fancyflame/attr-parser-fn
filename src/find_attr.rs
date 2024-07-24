@@ -7,7 +7,7 @@ where
     Ident: PartialEq<I>,
     I: ?Sized,
 {
-    move |attr| attr.path().is_ident(expect)
+    |attr| attr.path().is_ident(expect)
 }
 
 pub fn all<'a: 'p, 'p, I>(
@@ -36,7 +36,7 @@ where
 {
     let mut found = None;
     for attr in attrs {
-        if attr.path().is_ident(expect_path) {
+        if !attr.path().is_ident(expect_path) {
             continue;
         }
 

@@ -24,10 +24,6 @@ pub trait ParseAttrTrait {
 
 pub struct Marker<T>(PhantomData<T>);
 
-pub fn marker<T>() -> Marker<T> {
-    Marker(PhantomData)
-}
-
 impl<ReqArgs, OptArgs, RestArgs, Meta> ParseAttrTrait
     for ParseArgs<Marker<ReqArgs>, Marker<OptArgs>, Marker<RestArgs>, Meta>
 where
@@ -144,4 +140,8 @@ fn with_comma(input: ParseStream) -> Result<()> {
     }
 
     Ok(())
+}
+
+fn marker<T>() -> Marker<T> {
+    Marker(PhantomData)
 }
