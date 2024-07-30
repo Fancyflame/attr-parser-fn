@@ -3,6 +3,8 @@ use std::{collections::HashSet, marker::PhantomData};
 use args::ParseRequiredArgs;
 use meta::ParseMeta;
 use opt_args::ParseOptionalArgs;
+use proc_macro2::{TokenStream, TokenTree};
+use quote::ToTokens;
 use rest_args::ParseRestArgs;
 use syn::{
     buffer::Cursor,
@@ -16,10 +18,40 @@ pub mod meta;
 pub mod opt_args;
 pub mod rest_args;
 
-pub trait ParseAttrTrait {
+pub trait ParseAttrTrait: Sized {
     type Output;
     fn parse(self, input: ParseStream) -> Result<Self::Output>;
-    fn parse_attrs(self, input: &Attribute) -> Result<Self::Output>;
+
+    fn parse_attrs(self, input: &Attribute) -> Result<Self::Output> {
+        (|input: ParseStream| self.parse(input)).parse2(input.meta.require_list()?.tokens.clone())
+    }
+
+    fn parse_concat_attrs<'r, I>(self, input: I) -> Result<Self::Output>
+    where
+        I: Iterator<Item = &'r Attribute>,
+    {
+        let parser = |input: ParseStream| self.parse(input);
+        let mut concatenated = TokenStream::new();
+
+        for attr in input {
+            let tokens = attr.meta.require_list()?.tokens.clone();
+            if tokens.is_empty() {
+                continue;
+            }
+
+            let mut trail_comma = false;
+            concatenated.extend(tokens.into_iter().map(|token| {
+                trail_comma = matches!(&token, TokenTree::Punct(p) if p.as_char() == ',');
+                token
+            }));
+
+            if !trail_comma {
+                <Token![,]>::default().to_tokens(&mut concatenated);
+            }
+        }
+
+        parser.parse2(concatenated)
+    }
 }
 
 pub struct Marker<T>(PhantomData<T>);
@@ -70,10 +102,6 @@ where
                 self.meta.finish()?
             },
         })
-    }
-
-    fn parse_attrs(self, input: &Attribute) -> Result<Self::Output> {
-        (|input: ParseStream| self.parse(input)).parse2(input.meta.require_list()?.tokens.clone())
     }
 }
 
