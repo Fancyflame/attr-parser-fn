@@ -59,7 +59,7 @@ where
         self.1.finish().ok_or_else(|| {
             Error::new(
                 Span::call_site(),
-                format!("attribute path `{}` must be specified", self.0),
+                format!("attribute `{}` must be specified", self.0),
             )
         })
     }
@@ -226,7 +226,7 @@ where
     }
 
     fn ok_to_finish(&self) -> bool {
-        true
+        matches!(self.0, ListInner::Assigned(_))
     }
 }
 

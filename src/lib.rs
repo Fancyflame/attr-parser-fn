@@ -22,7 +22,7 @@ pub trait ParseAttrTrait: Sized {
     type Output;
     fn parse(self, input: ParseStream) -> Result<Self::Output>;
 
-    fn parse_attrs(self, input: &Attribute) -> Result<Self::Output> {
+    fn parse_attr(self, input: &Attribute) -> Result<Self::Output> {
         (|input: ParseStream| self.parse(input)).parse2(input.meta.require_list()?.tokens.clone())
     }
 

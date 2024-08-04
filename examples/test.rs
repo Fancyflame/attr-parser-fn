@@ -58,7 +58,7 @@ fn main() {
                 "conf1_expr",
                 (false, "green_tea"),
             ),
-    } = parser.parse_attrs(&attr).unwrap()
+    } = parser.parse_attr(&attr).unwrap()
     else {
         unreachable!()
     };
