@@ -9,7 +9,7 @@ use rest_args::ParseRestArgs;
 use syn::{
     buffer::Cursor,
     parse::{ParseStream, Parser},
-    Attribute, Error, Result, Token,
+    Attribute, Error, Meta, Result, Token,
 };
 
 pub mod args;
@@ -23,7 +23,16 @@ pub trait ParseAttrTrait: Sized {
     fn parse(self, input: ParseStream) -> Result<Self::Output>;
 
     fn parse_attr(self, input: &Attribute) -> Result<Self::Output> {
-        (|input: ParseStream| self.parse(input)).parse2(input.meta.require_list()?.tokens.clone())
+        (|input: ParseStream| self.parse(input)).parse2(match &input.meta {
+            Meta::Path(_) => TokenStream::new(),
+            Meta::List(list) => list.tokens.clone(),
+            Meta::NameValue(meta) => {
+                return Err(Error::new_spanned(
+                    meta,
+                    "expect `path` or `list(...)`, found `key = value`",
+                ))
+            }
+        })
     }
 
     fn parse_concat_attrs<'r, I>(self, input: I) -> Result<Self::Output>
